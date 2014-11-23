@@ -45,10 +45,15 @@ class App
         error("Don't know how about this process definition #{process}")
       end
     end
-    if options[:output].nil?
-      @output_node = @process_node
+    if options[:combine].nil?
+      @combine_node = @process_node
     else
-      error "output types not implemented"  # this is from CLIlogging
+      @combine_node = Rbetl::CombineLines.new(@process_node,options[:combine])
+    end
+    if options[:output].nil?
+      @output_node = @combine_node
+    else
+      @output_node = Rbetl::OutputFile.new(@combine_node,options[:output])
     end
     @output_node.publish
   end
@@ -75,6 +80,7 @@ class App
       "'PATTERN/pattern/n'            line with pattern and n lines after,  '/' can be replaced with any other char",
       "'BETWEEN/pattern1/pattern2'    line with pattern1 to line with pattern2")
   on("-o OUTPUT_STREAM","--output", "output stream defaults to stdout")
+  on("-c SEPERATOR","--combine", "combine multiline matches into a single line")
 
   # Require an argument
   # arg :some_arg 

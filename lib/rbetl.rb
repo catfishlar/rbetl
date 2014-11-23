@@ -8,7 +8,9 @@ module Rbetl
     end
 
     def get
-      return gets
+      line = gets
+      line = line.chomp  unless line.nil?
+      return line
     end
   end
 
@@ -56,7 +58,8 @@ module Rbetl
           publish_line(lines)
         end
       end
-      end
+    end
+
 
     private
 
@@ -88,10 +91,8 @@ module Rbetl
 
   class InputFile < EtlNode
     def initialize(filename=nil)
-      if !filename.nil?
-        @filename = filename
-      end
-      @filehandle = nil
+      @filename = filename
+      @file = nil
     end
 
     def open_file(filename)
@@ -100,7 +101,7 @@ module Rbetl
     end
 
     def close_file
-      @file.close() unless @file.nil?
+      @file.close unless @file.nil?
     end
 
     def get
@@ -112,7 +113,38 @@ module Rbetl
           #Error?
         end
       end
-      return @file.gets
+      line = @file.gets
+      line = line.chomp unless line.nil?
+      return line
+    end
+  end
+
+  class OutputFile < EtlNode
+    def initialize(source, filename=nil)
+      @source = source
+      @filename = filename
+      @file = nil
+    end
+
+    def open_file(filename=nil)
+      @filename = filename unless filename.nil?
+      @file = File.open(@filename, 'w')
+    end
+
+    def close_file
+      @file.close unless @file.nil?
+    end
+
+    def publish
+      if @file.nil?
+        @file = open_file
+      end
+      super
+      close_file
+    end
+
+    def publish_line(line)
+      @file.puts(line)
     end
   end
 
@@ -135,7 +167,7 @@ module Rbetl
         line = @source.get
         return nil if line.nil?
         if line.respond_to? :each
-          error ("PatternContext::get is not designed to get arrays of lines from its source")
+          error ('PatternContext::get is not designed to get arrays of lines from its source')
         end
         match = line if @compare.call(line,@pattern)
       end
@@ -187,6 +219,24 @@ module Rbetl
         ret_lines << line unless line.nil?
       end until line.nil? || @compare.call(line,@pattern2)
       return ret_lines
+    end
+
+  end
+  class CombineLines < EtlNode
+
+    def initialize(source, seperator)
+      @source = source
+      @seperator = seperator
+    end
+
+    #-------
+    # overriding Get so we can join any arrays of strings with the seperator
+    def get
+      lines = @source.get
+      if lines.respond_to? :each
+        lines = lines.join(@seperator)
+      end
+      return lines
     end
 
   end

@@ -14,9 +14,10 @@ Feature: Complex line processing
     And the banner should document that this app takes options
     And the following options should be documented:
       |--version|
-      |--regex  |
       |--input  |
+      |--regex  |
       |--process|
+      |--combine|
       |--output |
     And the banner should document that this app takes no arguments
 
@@ -90,5 +91,19 @@ Feature: Complex line processing
   molly
   end
   """
+    And the output should not contain "jesse"
+    And the output should not contain "justin"
+
+  Scenario: Output lines between two patterns as a single line
+    Given a file named "bob" with:
+    """
+    jesse
+    begin
+    molly
+    end
+    justin
+    """
+    When I run `rbetl --input=bob --process="BETWEEN/begin/end" --combine="|"`
+    Then  the output should contain "begin|molly|end"
     And the output should not contain "jesse"
     And the output should not contain "justin"
