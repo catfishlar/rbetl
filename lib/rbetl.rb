@@ -61,7 +61,7 @@ module Rbetl
     end
 
 
-    private
+    #private
 
     def process(lines)
       if lines.respond_to? :each
@@ -81,7 +81,7 @@ module Rbetl
     end
 
     def process_line(line)
-      puts(line)
+      return line
     end
 
     def publish_line(line)
