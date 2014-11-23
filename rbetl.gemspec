@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Rbetl::VERSION
   spec.authors       = ["Larry Murdock"]
   spec.email         = ["catfish.murdock@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = %q{rbetl processes text lines from various sources and to various outputs}
+  spec.description   = %q{rbetl is three nodes where the output node pulls from the processor which pulls from the input. }
   spec.homepage      = ""
   spec.license       = "apache"
 

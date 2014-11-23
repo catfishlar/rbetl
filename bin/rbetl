@@ -8,10 +8,49 @@ class App
   include Methadone::Main
   include Methadone::CLILogging
 
-  main do # Add args you want: |like,so|
-    # your program code here
-    # You can access CLI options via
-    # the options Hash
+  main do
+    @input_node = nil
+    @process_node = nil
+    @output_node = nil
+    if options[:input].nil?
+      @input_node = Rbetl::EtlNode.new
+    else
+      @input_node = Rbetl::InputFile.new(options[:input])
+    end
+    if options[:process].nil?
+      @process_node = @input_node
+    else
+      compare = lambda{ |line,pattern| line.include?(pattern)}
+      if options[:regex]
+        compare = lambda{ |line,pattern| line =~ /#{pattern}/}
+      end
+      process = options[:process]
+      if process =~ /^PATTERN/
+        split_char = process[7]
+        params = process.split(split_char)
+        if params[1].nil? || params[2].nil?
+          error("Process PATTERN needs 2 parameters, the pattern and the number of lines.")
+        else
+          @process_node = Rbetl::PatternContext.new(@input_node,params[1],params[2].to_i,compare)
+        end
+      elsif process =~ /^BETWEEN/
+        split_char = process[7]
+        params = process.split(split_char)
+        if params[1].nil? || params[2].nil?
+          error("Process BETWEEN needs 2 parameters, Start Pattern and End Pattern.")
+        else
+          @process_node = Rbetl::PatternBetween.new(@input_node,params[1],params[2],compare)
+        end
+      else
+        error("Don't know how about this process definition #{process}")
+      end
+    end
+    if options[:output].nil?
+      @output_node = @process_node
+    else
+      error "output types not implemented"  # this is from CLIlogging
+    end
+    @output_node.publish
   end
 
   # supplemental methods here
@@ -19,6 +58,7 @@ class App
   # Declare command-line interface here
 
   # description "one line description of your app"
+  description "rbetl processes text in a growing number of ways"
   #
   # Accept flags via:
   # on("--flag VAL","Some flag")
@@ -29,6 +69,13 @@ class App
   #
   # Or, just call OptionParser methods on opts
   #
+  on("-i INPUT_STREAM","--input", "input stream defaults to stdin")
+  on("-r", "--regex", "use regex in process patterns, defaults to literal strings")
+  on("-p PROCESS","--process", "process defaults to passthrough",
+      "'PATTERN/pattern/n'            line with pattern and n lines after,  '/' can be replaced with any other char",
+      "'BETWEEN/pattern1/pattern2'    line with pattern1 to line with pattern2")
+  on("-o OUTPUT_STREAM","--output", "output stream defaults to stdout")
+
   # Require an argument
   # arg :some_arg 
   #
