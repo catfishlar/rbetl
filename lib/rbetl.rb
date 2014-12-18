@@ -1,6 +1,7 @@
 require "rbetl/version"
 require "rbetl/etl_node"
 require "rbetl/one_off_nodes"
+require "methadone"
 
 module Rbetl
 
@@ -11,7 +12,7 @@ module Rbetl
     end
 
     def open_file(filename)
-      @filename = filename
+      @filename = filenameinclude Methadone::CLILogging
       @file = File.open(@filename, 'r')
     end
 

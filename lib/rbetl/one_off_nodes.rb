@@ -1,6 +1,6 @@
-require "rbetl/etl_node"
-require "json"
-require "methadone/cli_logging"
+require 'rbetl/etl_node'
+require 'json'
+require 'methadone'
 
 module Rbetl
   class JsonTable < EtlNode
