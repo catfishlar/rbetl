@@ -53,7 +53,16 @@ class App
     if options[:output].nil?
       @output_node = @combine_node
     else
-      @output_node = Rbetl::OutputFile.new(@combine_node,options[:output])
+      if options[:output] =~ /JSONTABLE/
+        @output_node = Rbetl::JsonTable.new(@combine_node)
+      else
+        re = /FILE:(.*)/
+        match = re.match(options[:output])
+        if match
+          @output_node = Rbetl::OutputFile.new(@combine_node,match[1])
+        end
+
+      end
     end
     @output_node.publish
   end
@@ -79,7 +88,9 @@ class App
   on("-p PROCESS","--process", "process defaults to passthrough",
       "'PATTERN/pattern/n'            line with pattern and n lines after,  '/' can be replaced with any other char",
       "'BETWEEN/pattern1/pattern2'    line with pattern1 to line with pattern2")
-  on("-o OUTPUT_STREAM","--output", "output stream defaults to stdout")
+  on("-o OUTPUT_STREAM","--output", "output stream defaults to stdout",
+      "'FILE:filename'                output to a file",
+      "'JSONTABLE'                    outputs a hash and array of table name and table data as JSON to stdout")
   on("-c SEPERATOR","--combine", "combine multiline matches into a single line")
 
   # Require an argument
