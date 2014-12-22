@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'methadone'
+require 'rbetl.rb'
+
+class App
+  include Methadone::Main
+  include Methadone::CLILogging
+  include Rbetl
+
+  main do |mysql_schema, schema_json|
+
+    input = InputFile.new(mysql_schema)
+    compare = lambda{ |line,pattern| line =~ /#{pattern}/}
+    get_table_lines = PatternBetween.new(input,'^CREATE','^\)',compare)
+    get_table_hash = TableSchema.new(get_table_lines)
+    json_content = get_table_hash.publish
+    fh = File.open(schema_json,'w')
+    fh.puts(json_content)
+    fh.close
+  end
+  description 'takes a schema file from mysql and outputs a JSON version'
+  version Rbetl::VERSION
+
+  arg :mysql_schema
+  arg :schema_json
+
+  use_log_level_option :toggle_debug_on_signal => 'USR1'
+
+  go!
+end

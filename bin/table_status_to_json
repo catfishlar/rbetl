@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'methadone'
+require 'rbetl.rb'
+
+class App
+  include Methadone::Main
+  include Methadone::CLILogging
+  include Rbetl
+
+  main do |mysql_table_status, status_json|
+
+    input = InputFile.new(mysql_table_status)
+    compare = lambda{ |line,pattern| line =~ /#{pattern}/}
+    get_table_lines = PatternContext.new(input,'^\*\*\*',18,compare)
+    get_table_hash = LongFormTableStatus.new(get_table_lines)
+    json_content = get_table_hash.publish
+    fh = File.open(status_json,'w')
+    fh.puts(json_content)
+    fh.close
+  end
+  description 'takes a table status file from mysql and outputs a JSON version'
+  version Rbetl::VERSION
+
+  arg :mysql_table_status
+  arg :status_json
+
+  use_log_level_option :toggle_debug_on_signal => 'USR1'
+
+  go!
+end
