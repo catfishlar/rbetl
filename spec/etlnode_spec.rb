@@ -3,7 +3,8 @@ require 'rspec'
 describe 'Basic ETLNode' do
 
   it 'should echo a file' do
-
-    true.should == false
+    input = double("input", get: ["hi","hello"])
+    bob = input.get
+    bob.should == ["bob"]
   end
 end

@@ -1,6 +1,13 @@
 .DS_Store
+Gemfile.lock
 results.html
 pkg
 html
+tmp
+*.sql
+*.csv
+*.json
+*.txt
+*.out
 **/.idea/workspace.xml
 **/.idea/tasks.xml

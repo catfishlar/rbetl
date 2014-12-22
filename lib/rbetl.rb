@@ -30,7 +30,11 @@ module Rbetl
         end
       end
       line = @file.gets
-      line = line.chomp unless line.nil?
+      if line.nil?
+        close_file
+      else
+        line = line.chomp
+      end
       return line
     end
   end

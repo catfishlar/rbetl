@@ -1,3 +1,5 @@
+require 'methadone'
+
 module Rbetl
   class Lines
     def initialize(lines)
@@ -14,6 +16,7 @@ module Rbetl
       end
     end
   end
+
   class StdIn
 
     def initialize
@@ -27,6 +30,7 @@ module Rbetl
   end
 
   class EtlNode
+    include Methadone::CLILogging
 
     def initialize(source=nil)
       if source.nil?

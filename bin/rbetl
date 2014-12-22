@@ -7,15 +7,16 @@ require 'rbetl.rb'
 class App
   include Methadone::Main
   include Methadone::CLILogging
+  include Rbetl
 
   main do
     @input_node = nil
     @process_node = nil
     @output_node = nil
     if options[:input].nil?
-      @input_node = Rbetl::EtlNode.new
+      @input_node = EtlNode.new
     else
-      @input_node = Rbetl::InputFile.new(options[:input])
+      @input_node = InputFile.new(options[:input])
     end
     if options[:process].nil?
       @process_node = @input_node
