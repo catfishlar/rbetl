@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'methadone'
+require 'rbetl.rb'
+
+class App
+  include Methadone::Main
+  include Methadone::CLILogging
+  include Rbetl
+
+  main do |mysql_dump|
+=begin
+    if options[:input].nil?
+      @input_node = EtlNode.new
+    else
+      @input_node = InputFile.new(options[:input])
+    end
+=end
+    f = File.open(mysql_dump)
+    line = f.gets until line =~ /INSERT INTO `Demographic_Values_Table` VALUES/
+    re = /(\('(\w+)',(\w+),'((?:[^'\\]|\\.)*)',(\w*),(\w*),'([^']*)'\))/
+    overall_counts = Hash.new(0)
+    overall = Hash.new { |hash,key| hash[key] = []}
+    while line do
+      parts = line.scan(re)
+      counts = Hash.new(0)
+      parts.each{ |e| counts[e[2]] += 1; overall_counts[e[2]] += 1; overall[e[2]] << e[0] }
+      line = f.gets
+      #puts(counts.inspect)
+      #puts(counts.keys.length)
+    end
+    #puts(overall_counts.inspect)
+    #puts(overall_counts.keys.length)
+    overall.keys.each do |key|
+      f = File.new("#{key}.txt",'w')
+      overall[key].each { |line|  f.puts(line)}
+      f.close
+    end
+  end
+  description 'Eat MySql Dump file'
+  # on('-i INPUT_STREAM','--input', 'input stream defaults to stdin')
+  arg :mysql_dump
+
+  use_log_level_option :toggle_debug_on_signal => 'USR1'
+  version Rbetl::VERSION
+
+    go!
+end
+# re = /(\('(\w+)',(\w+),'((?:[^'\\]|\\.)*)',(\w*),(\w*),'([^']*)'\))/
+# arr = str.scan(re)
+#
+# Groups
+#
+# (\('(\w+)',(\w+),'((?:[^'\\]|\\.)*)',(\w*),(\w*),'([^']*)'\))    0: The whole thing.
+#\('(\w+)'               1:Unique ID
+# (\w+)                  2: D_ID
+# '((?:[^'\\]|\\.)*)'    3: VALUE
+# (\w*)                  4: EMAIL_ID
+# (\w*)                  5: MAILING_LIST_ID
+# '([^']*)'               6: MODIFY_DATE
+#

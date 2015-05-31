@@ -84,7 +84,7 @@ class App
   #
   # Or, just call OptionParser methods on opts
   #
-  on("-i INPUT_STREAM","--input", "input stream defaults to stdin")
+  on('-i INPUT_STREAM','--input', 'input stream defaults to stdin')
   on("-r", "--regex", "use regex in process patterns, defaults to literal strings")
   on("-p PROCESS","--process", "process defaults to passthrough",
       "'PATTERN/pattern/n'            line with pattern and n lines after,  '/' can be replaced with any other char",

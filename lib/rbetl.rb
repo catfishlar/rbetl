@@ -1,6 +1,7 @@
 require "rbetl/version"
 require "rbetl/etl_node"
-require "rbetl/one_off_nodes"
+require 'rbetl/one_off_nodes'
+require 'rbetl/json_node'
 require "methadone"
 
 module Rbetl
